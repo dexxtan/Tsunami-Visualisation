@@ -16,7 +16,7 @@ div#list{
 }
 
 div#visualisation_label{
-  color: #E6E6FA; 
+  color: #FFFFFF; 
 }
 
 div#visualisation_blurp{
@@ -146,37 +146,65 @@ dl.function i {
 }
 
 div#row1 {
-  display: inline-block;
-  position: relative;
   height: 70%;
-  width: 100%;
 }
 
-div#row2{
-  position: relative;
-  height: 5%;
-  width: 98%;
-  padding: 0% 1%
-}
-
-div#row3{
-  position: relative;
-  height: 20%;
-  width: 100%;
-}
-
-div#row4{
-  position: relative;
+div#row2 {
+  height: 30%;
   width: 98%;
   padding: 0% 1%;
+}
+
+div#column1 {
+  float: left;
+  position: relative;
+  height: 100%;
+  width: 54%;
+  padding: 0% 0.5%;
+}
+
+div#column2 {
+  float: right;
+  position: relative;
+  height: 100%;
+  width: 44%;
+  padding: 0% 0.5%;
 }
 
 div#map {
-  position: absolute;
-  float: left;
   height: 100%;
-  width: 55%;
-  padding: 0% 1%;
+}
+
+div#chart1_top {
+  height: 15%;
+}
+
+div#chart1 {
+  background: #021019;
+  height: 70%;
+}
+
+div#chart1_bottom {
+  height: 15%;
+  text-align: center;
+}
+
+div#details {
+  height: 100%;
+}
+
+div#event_details, div#tsunami_details {
+  padding-left: 2%;
+}
+
+div#event_details div p, div#tsunami_details div p {
+  margin: 0;
+  display: inline;
+  color: orange;
+}
+
+div#event_details_label , div#tsunami_details_label {
+  border-bottom: 2px solid orange;
 }
 
 div.label {
@@ -197,36 +225,12 @@ div.label.big {
 }
 
 div.label.huge {
-  font-size: 48px;
+  font-size: 56px;
   color: white;
 }
 
 div.label.top {
   margin-top: 2px;
-}
-
-div#details {
-  float: right;
-  height: inherit;
-  width: 45%;
-}
-
-div#details_overview {
-
-}
-
-div#event_details, div#tsunami_details {
-  padding-left: 2%;
-}
-
-div#event_details div p, div#tsunami_details div p {
-  margin: 0;
-  display: inline;
-  color: orange;
-}
-
-div#event_details_label , div#tsunami_details_label {
-  border-bottom: 2px solid orange;
 }
 
 div#azimuthal_type {
@@ -240,30 +244,23 @@ div#azimuthal svg {
 }
 
 div#azimuthal path.country {
-  fill: #E6E6FA;
+  fill: #FFFFFF;
   stroke: #021019;
 }
 
 div#azimuthal circle.source {
   stroke: black;
   stroke-width: 1;
-  fill: orange;
-  fill-opacity: .5;
 }
 
 div#azimuthal circle.source-selected {
   stroke: black;
   stroke-width: 2;
-  fill: orange;
-  fill-opacity: .8;
 }
 
 div#azimuthal circle.invis {
   stroke: black;
   stroke-width: 1;
-  stroke-opacity: 0;
-  fill: orange;
-  fill-opacity: 0;
 }
 
 div#azimuthal circle.hit {
@@ -278,14 +275,6 @@ div#azimuthal path.line {
   fill-opacity: 0;
   stroke: red;
   stroke-opacity: .5;
-}
-
-div#chart {
-  position: absolute;
-  background: #021019;
-  height: 100%;
-  width: 98%;
-  padding: 0% 1%;
 }
 
 .axis path,

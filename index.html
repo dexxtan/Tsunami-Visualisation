@@ -32,91 +32,90 @@
 
         <!-- Add your site or application content here -->
         <div id="row1">
-          <div id="map">
-            <div id="azimuthal_type">
-              <div class="label small">Projection Type</div>
-              <select>
-                <option value="equalarea">equalarea</option>
-                <option value="equidistant">equidistant</option>
-                <option value="gnomonic">gnomonic</option>
-                <option value="orthographic" selected>orthographic</option>
-                <option value="stereographic">stereographic</option>
-              </select>
+          <div id="column1">
+            <div id="map">
+              <div id="azimuthal_type">
+                <div class="label small" style="color: orange">Projection Type</div>
+                <select>
+                  <option value="equalarea">equalarea</option>
+                  <option value="equidistant">equidistant</option>
+                  <option value="gnomonic">gnomonic</option>
+                  <option value="orthographic" selected>orthographic</option>
+                  <option value="stereographic">stereographic</option>
+                </select>
+              </div>
+              <div id="azimuthal"></div>
             </div>
-            <div id="azimuthal"></div>
           </div>
-          <div id="details">
-            <div id="overview_box">
-              <div id="visualisation_label" class="label huge">Tsunami Explorer</div>
-              <div id="visualisation_blurp" class="label">
-                <p>
-                The Tsunami Explorer was made with D3.js. Based on tsunami historical data from the NOAA, it visualizes events (like earthquakes) and 
-                resulting tsunamis from 1900 to 2012.
-                </p>
+
+          <div id="column2">
+            <div id="details">
+              <div id="overview_box">
+                <div id="visualisation_label" class="label huge">Tsunami Explorer</div>
+                <div id="visualisation_blurp" class="label">
+                  The Tsunami Explorer was made with D3.js. Based on tsunami historical data from the NOAA, it visualizes events (like earthquakes) and 
+                  resulting tsunamis from 1900 to 2012.
+                </div>
               </div>
-            </div>
-            <div id="event_details_box">
-              <div id="event_details_label" class="label top">Event Details</div>
-              <div id="event_details">
-                <div class="label small">Tsunami Cause: <p id="event_cause"></p></div>
-                <div class="label small">Cause Date: <p id="event_date"></p></div>
-                <div class="label small">Cause Location: <p id="event_location"></p></div>
-                <div class="label small">Highest Tsunami Height: <p id="event_max_height"></p></div>
-                <div class="label small">Total Deaths: <p id="event_deaths"></p></div>
-                <div class="label small">Total Injuries: <p id="event_injuries"></p></div>
-                <div class="label small">Total Economic Damage: <p id="event_damage"></p></div>
+              <div id="event_details_box">
+                <div id="event_details_label" class="label top">Event Details</div>
+                <div id="event_details">
+                  <div class="label small">Tsunami Cause: <p id="event_cause"></p></div>
+                  <div class="label small">Cause Date: <p id="event_date"></p></div>
+                  <div class="label small">Cause Location: <p id="event_location"></p></div>
+                  <div class="label small">Highest Tsunami Height: <p id="event_max_height"></p></div>
+                  <div class="label small">Total Deaths: <p id="event_deaths"></p></div>
+                  <div class="label small">Total Injuries: <p id="event_injuries"></p></div>
+                  <div class="label small">Total Economic Damage: <p id="event_damage"></p></div>
+                </div>
               </div>
-            </div>
-            <div id="tsunami_details_box">
-              <div id="tsunami_details_label" class="label">Tsunami Details</div>
-              <div id="tsunami_details">
-                <div class="label small">Location: <p id="tsunami_location"></p></div>
-                <div class="label small">Distance From Source: <p id="tsunami_distance"></p></div>
-                <div class="label small">Travel Time: <p id="tsunami_travel_time"></p></div>
-                <div class="label small">Tsunami Height: <p id="tsunami_height"></p></div>
-                <div class="label small">Land Flooded: <p id="tsunami_flood_distance"></p></div>
-                <div class="label small">Deaths: <p id="tsunami_deaths"></p></div>
-                <div class="label small">Injuries: <p id="tsunami_injuries"></p></div>
-                <div class="label small">Economic Damage: <p id="tsunami_damage"></p></div>
+              <div id="tsunami_details_box">
+                <div id="tsunami_details_label" class="label">Tsunami Details</div>
+                <div id="tsunami_details">
+                  <div class="label small">Location: <p id="tsunami_location"></p></div>
+                  <div class="label small">Distance From Source: <p id="tsunami_distance"></p></div>
+                  <div class="label small">Travel Time: <p id="tsunami_travel_time"></p></div>
+                  <div class="label small">Tsunami Height: <p id="tsunami_height"></p></div>
+                  <div class="label small">Land Flooded: <p id="tsunami_flood_distance"></p></div>
+                  <div class="label small">Deaths: <p id="tsunami_deaths"></p></div>
+                  <div class="label small">Injuries: <p id="tsunami_injuries"></p></div>
+                  <div class="label small">Economic Damage: <p id="tsunami_damage"></p></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
         <div id="row2">
-          <div id="chart_label" class="label" style="position: absolute">Events</div>
-          <div id="list" style="float: right"> 
-            <form name="filter">
-              <input type="radio" id="magnitude" name="variable" value="magnitude" checked>Magnitude&nbsp;</input>
-              <input type="radio" id="death" name="variable" value="death">Deaths by Tsunami&nbsp;</input>
-              <input type="radio" id="waterHeight" name="variable" value="death">Max Water Height</input>
-            </form>
+          <div id="chart1_top">
+            <div id="chart_label" class="label" style="position: absolute">Events</div>
+            <div id="list" style="float: right"> 
+              <form name="filter">
+                <input type="radio" id="magnitude" name="variable" value="magnitude" checked>Magnitude&nbsp;</input>
+                <input type="radio" id="death" name="variable" value="death">Deaths by Tsunami&nbsp;</input>
+                <input type="radio" id="waterHeight" name="variable" value="death">Max Water Height</input>
+              </form>
+            </div>
+          </div>
+          <div id="chart1"></div>
+          <div id="chart1_bottom">
+            <div style="position: absolute; font-size: 12px; bottom: 0; width: 98%;">
+              Tip: Tap the space bar to pause and select an event!
+            </div>
+            <div id="legend" class="label" style="float: left">1900</div>
+            <div id="legend2" class="label" style="float: right">2012</div>
           </div>
         </div>
-
-        <div id="row3">
-          <div id="chart"></div>
-        </div>
-
-        <div id="row4" style="text-align: center">
-          <div style="position: absolute; margin-bottom: -26px; font-size: 12px; bottom: 0; width: 98%; text-align: center">
-            Tip: Tap the space bar to pause and select an event!
-          </div>
-          <div id="legend" class="label" style="float: left">1900</div>
-          <div id="legend2" class="label" style="float: right">2012</div>
-        </div>
-        
-        <div id="output"></div>
+        <!--<div id="output"></div>-->
         <script src="js/json_generator.js" type="text/javascript"></script>
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>
-            var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+            /*var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
             (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
             g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-            s.parentNode.insertBefore(g,s)}(document,'script'));
+            s.parentNode.insertBefore(g,s)}(document,'script'));*/
         </script>
     </body>
 </html>

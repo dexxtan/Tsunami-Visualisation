@@ -49,6 +49,24 @@ var projection = d3.geo.azimuthal()
 var circle = d3.geo.circle()
     .origin(projection.origin());
 
+var zoom = d3.behavior.zoom(true)
+    .translate(projection.origin())
+    .scale(projection.scale())
+    .scaleExtent([size, 9600])
+    .on("zoom", move);
+
+var scale0 = projection.scale();
+var scaleN = projection.scale();
+
+function move() {
+  if(d3.event){
+    scaleN = d3.event.scale;
+    projection.scale(scaleN);
+    
+    refresh();
+  }
+}
+
 // TODO fix d3.geo.azimuthal to be consistent with scale
 var scale = {
   orthographic: size,
@@ -91,7 +109,8 @@ d3.json("data/world-countries.json", function(collection) {
 d3.select("#azimuthal")
     .on("mousedown", mousedown)
     .on("mousemove", mousemove)
-    .on("mouseup", mouseup);
+    .on("mouseup", mouseup)
+    .call(zoom);
 
 d3.select("select").on("change", function() {
   projection.mode(this.value).scale(scale[this.value]);
@@ -111,7 +130,8 @@ function mousemove() {
   if (m0) {
     stopRotating = true;
     var m1 = [d3.event.pageX, d3.event.pageY],
-        o1 = [o0[0] + (m0[0] - m1[0]) / 8, o0[1] + (m1[1] - m0[1]) / 8];
+        o1 = [o0[0] + (m0[0] - m1[0]) / (8 * scaleN / scale0), o0[1] + (m1[1] - m0[1]) / (8 * scaleN / scale0)];
+
     projection.origin(o1);
     circle.origin(o1)
     refresh();
@@ -218,18 +238,6 @@ function refresh(duration) {
 function clip(d) {
   return path(circle.clip(d));
 }
-    
-// chart code
-var w = $("div#chart").width();
-var h = $("div#chart").height();
-
-var svg = d3.select("#chart").append("svg");
-
-svg.append("rect")
-    .attr("class", "background")
-    .attr("fill", "#021019")
-    .attr("width", w)
-    .attr("height", h);
 
 // Load the tsunami data. When the data comes back, display it.
 d3.json("data/tsunami.json", function(data) {
@@ -237,11 +245,24 @@ d3.json("data/tsunami.json", function(data) {
 
   for (var i = 0; i < dataset.length; i++) {
     if (dataset[i].value[10] == null) dataset[i].value[10] = 0;
-    if (dataset[i].value[1] < 1900) {
+    if (dataset[i].value[1] < 1900 || dataset[i].value[7] < 4 || (dataset[i].value[14] == null && dataset[i].value[15] == null)) {
       dataset.splice(i, 1);
       i--;
+    } else {
+      // create dataset[i].date for each event to be displayed
+      if (dataset[i].date == null) {
+        var date = new Date(dataset[i].value[1],0,1,0,0,0,0);
+        if (dataset[i].value[2] != null) date.setMonth(dataset[i].value[2]-1);
+        if (dataset[i].value[3] != null) date.setDate(dataset[i].value[3]);
+        dataset[i].date = date;
+      }
     }
   }
+
+  var maxDeath = d3.max(dataset, function(d) { return d.value[22]; });
+  var deathColorScale = d3.scale.log()
+      .domain([0.1, maxDeath])
+      .range(["#FFA500", "#FF0000"]); // [startColor: orange , endColor: red]
 
   /************AZIMUTHAL CODE************/
   point = azimuthal.selectAll("sources")
@@ -249,7 +270,8 @@ d3.json("data/tsunami.json", function(data) {
     .enter().append("svg:circle")
       .attr("class", "source")
       .attr("fill", function(d) {
-        return "orange";
+        var deaths = d.value[22] == null ? 0.1 : d.value[22]
+        return d3.rgb(deathColorScale(deaths)).darker(0.0).toString();
       })
       .attr("cx", function(d) {
         return projection([d.value[15], d.value[14]])[0];
@@ -261,13 +283,6 @@ d3.json("data/tsunami.json", function(data) {
         return "4.5";
       })
       .attr("id", function(d) {
-        // create d.date for each event
-        if (d.date == null) {
-          var date = new Date(d.value[1],0,1);
-          if (d.value[2] != null) date.setMonth(d.value[2]-1);
-          if (d.value[3] != null) date.setMonth(d.value[3]);
-          d.date = date;
-        }
         return "e" + d.value[0];
       })
       .on("click", click);
@@ -323,6 +338,80 @@ d3.json("data/tsunami.json", function(data) {
     refresh();
   }
 
+  function populateHits(d) {
+    // focus map on selected
+    circle.origin([d.value[15], d.value[14]]);
+    projection.origin([d.value[15], d.value[14]]);
+    // highlight selected source
+    azimuthal.select("circle#e"+d.value[0])
+        .attr("class", "source-selected")
+        .attr("r", 6);
+    // hide all other sources
+    azimuthal.selectAll("circle.source").each(function(d, i) {
+      d3.select(this).attr("class", "invis");
+    });
+    $.each(d.value[46], function() {
+      if (this[10] != null && this[9] != null) {
+        // code to highlight hit
+        var subPoint = azimuthal.insert("svg:circle", "circle#e"+d.value[0])
+            .datum(this)
+            //.attr("transform", transform)
+            .attr("class", "hit")
+            .attr("source", d.value[0])
+            .attr("fill", function(d) {
+              return "yellow";
+            })
+            .attr("cx", function(d) {
+              return projection([d[10], d[9]])[0];
+            })
+            .attr("cy", function(d) {
+              return projection([d[10], d[9]])[1];
+            })
+            .attr("r", function(d) {
+              return "4.5";
+            });
+
+        // code to create line
+        var subPointLine = azimuthal.insert("svg:path", "circle.hit")
+            .datum({ 
+                "type": "Feature", 
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [ [d.value[15], d.value[14]], [this[10], this[9]] ]
+                }
+            })
+            .attr("class", "line")
+            .attr("d", clip);
+
+        point[0].push(subPoint[0][0]);
+        feature[0].push(subPointLine[0][0]);
+      }
+    });
+
+    $('svg circle.hit').on("mouseover", function(d) {
+      var d = this.__data__;
+      populateTsunamiDetails(d);
+      $('svg circle.hit').tipsy({
+        gravity: $.fn.tipsy.autoWE,
+        html: true,
+        title: function() {
+          var d = this.__data__;
+          var distance = d[12], w = d[15], deaths = d[20], l = d[8] + ", " + d[6];
+          return  'Distance: <span style="color: orange">' + distance + ' km</span><br />' +
+                  'Water Height: <span style="color: orange">' + w + ' m</span><br />' +
+                  'Deaths: <span style="color: orange">' + (deaths ? deaths : 0) + '</span><br />' +
+                  'Location: <span style="color: orange">' + l + '</span>';
+        }
+      });
+    });
+  }
+
+  function clearDetails() {
+    $("div#event_details div p, div#tsunami_details div p").each(function() {
+      $(this).text("");
+    });
+  }
+
   function populateEventDetails(d) {
     var cause = "";
     switch (d.value[8]) {
@@ -371,79 +460,6 @@ d3.json("data/tsunami.json", function(data) {
     $("p#event_deaths").text(d.value[22] ? d.value[22] : "N/A");
     $("p#event_injuries").text(d.value[26] ? d.value[26] : "N/A");
     $("p#event_damage").text(d.value[28] ? d.value[28] + " million dollars" : "N/A");
-  }
-
-  function clearDetails() {
-    $("div#event_details div p, div#tsunami_details div p").each(function() {
-      $(this).text("");
-    });
-  }
-
-  function populateHits(d) {
-    // focus map on selected
-    circle.origin([d.value[15], d.value[14]]);
-    projection.origin([d.value[15], d.value[14]]);
-    // highlight selected source
-    azimuthal.select("circle#e"+d.value[0])
-        .attr("class", "source-selected")
-        .attr("r", 6);
-    // hide all other sources
-    azimuthal.selectAll("circle.source").each(function(d, i) {
-      d3.select(this).attr("class", "invis");
-    });
-    $.each(d.value[46], function() {
-      // code to highlight hit
-      var subPoint = azimuthal.insert("svg:circle", "circle#e"+d.value[0])
-          .datum(this)
-          //.attr("transform", transform)
-          .attr("class", "hit")
-          .attr("source", d.value[0])
-          .attr("fill", function(d) {
-            return "yellow";
-          })
-          .attr("cx", function(d) {
-            return projection([d[10], d[9]])[0];
-          })
-          .attr("cy", function(d) {
-            return projection([d[10], d[9]])[1];
-          })
-          .attr("r", function(d) {
-            return "4.5";
-          });
-
-      // code to create line
-      var subPointLine = azimuthal.insert("svg:path", "circle.hit")
-          .datum({ 
-              "type": "Feature", 
-              "geometry": {
-                "type": "LineString",
-                "coordinates": [ [d.value[15], d.value[14]], [this[10], this[9]] ]
-              }
-          })
-          .attr("class", "line")
-          .attr("d", clip);
-
-      point[0].push(subPoint[0][0]);
-      feature[0].push(subPointLine[0][0]);
-      
-    });
-
-    $('svg circle.hit').on("mouseover", function(d) {
-      var d = this.__data__;
-      populateTsunamiDetails(d);
-      $('svg circle.hit').tipsy({
-        gravity: $.fn.tipsy.autoWE,
-        html: true,
-        title: function() {
-          var d = this.__data__;
-          var distance = d[12], w = d[15], deaths = d[20], l = d[8] + ", " + d[6];
-          return  'Distance: <span style="color: orange">' + distance + ' km</span><br />' +
-                  'Water Height: <span style="color: orange">' + w + ' m</span><br />' +
-                  'Deaths: <span style="color: orange">' + (deaths ? deaths : 0) + '</span><br />' +
-                  'Location: <span style="color: orange">' + l + '</span>';
-        }
-      });
-    });
   }
 
   function populateTsunamiDetails(d) {
@@ -660,7 +676,20 @@ d3.json("data/tsunami.json", function(data) {
     }
   });
 
-  /************CHART CODE******************/
+  /************CHART1 CODE******************/
+    
+  // chart code
+  var w = $("div#chart1").width();
+  var h = $("div#chart1").height();
+
+  var svg = d3.select("#chart1").append("svg");
+
+  svg.append("rect")
+      .attr("class", "background")
+      .attr("fill", "#021019")
+      .attr("width", w)
+      .attr("height", h);
+
   var v = 10;
   var paused = false;
 
@@ -727,8 +756,8 @@ d3.json("data/tsunami.json", function(data) {
         field = "Max Water Height";
       }
     
-      var a = this.__data__, c = a.value[v], e = a.value[1], f = a.value[13];
-      return  field + ': <span style="color: orange' + '">' + c + '</span><br>Year: <span style="color: orange' + '">' + e + '</span><br>Location: <span style="color: orange' + '">' + f + '</span>';
+      var a = this.__data__, c = a.value[v], e = a.date.toDateString(), f = a.value[13];
+      return  field + ': <span style="color: orange' + '">' + c + '</span><br>Date: <span style="color: orange' + '">' + e + '</span><br>Location: <span style="color: orange' + '">' + f + '</span>';
     }
   });
   
